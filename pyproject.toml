@@ -4,13 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentictools"
-version = "0.1.0"
-description = "Provider-neutral, read-only web discovery and Markdown capture tools for AI agents."
+version = "0.2.0"
+description = "Provider-neutral web discovery, Markdown capture, deduplicated archiving, and search tools for AI agents."
 requires-python = ">=3.12"
 dependencies = [
   "crawl4ai==0.9.2",
   "mcp>=2.0,<3",
   "pydantic>=2.11,<3",
+  "PyYAML>=6.0,<7",
 ]
 
 [project.optional-dependencies]

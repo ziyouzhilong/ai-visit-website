@@ -5,8 +5,16 @@ import time
 
 from agentictools.adapters.base import AdapterFailure, CaptureAdapter, CaptureDocument
 from agentictools.adapters.crawl4ai import Crawl4AIAdapter
+from agentictools.archive import MarkdownArchive
 from agentictools.discovery import discover_links
-from agentictools.models import FailureDetail, PageReadResult, SiteDiscoveryResult
+from agentictools.models import (
+    ArchiveSearchResult,
+    FailureDetail,
+    PageReadResult,
+    PageSaveRequest,
+    PageSaveResult,
+    SiteDiscoveryResult,
+)
 from agentictools.url_policy import PublicURLPolicy, URLPolicyError
 
 
@@ -17,9 +25,11 @@ class AgentWebArchiveService:
         self,
         adapter: CaptureAdapter | None = None,
         url_policy: PublicURLPolicy | None = None,
+        archive: MarkdownArchive | None = None,
     ) -> None:
         self.url_policy = url_policy or PublicURLPolicy()
         self.adapter = adapter or Crawl4AIAdapter(self.url_policy)
+        self.archive = archive or MarkdownArchive(url_policy=self.url_policy)
 
     async def page_read(self, url: str) -> PageReadResult:
         started = time.perf_counter()
@@ -147,6 +157,33 @@ class AgentWebArchiveService:
             status_code=status_code,
             failure=failure,
         )
+
+    async def page_save(self, request: PageSaveRequest) -> PageSaveResult:
+        return await self.archive.save(request)
+
+    def archive_search(
+        self,
+        *,
+        query: str | None = None,
+        source: str | None = None,
+        tags: list[str] | None = None,
+        captured_after: str | None = None,
+        captured_before: str | None = None,
+        content_hash: str | None = None,
+        limit: int = 20,
+    ) -> ArchiveSearchResult:
+        return self.archive.search(
+            query=query,
+            source=source,
+            tags=tags,
+            captured_after=captured_after,
+            captured_before=captured_before,
+            content_hash=content_hash,
+            limit=limit,
+        )
+
+    def archive_read(self, document_id: str) -> str:
+        return self.archive.read_document(document_id)
 
     def _discovery_failure(
         self,
