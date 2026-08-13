@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentictools"
+version = "0.1.0"
+description = "Provider-neutral, read-only web discovery and Markdown capture tools for AI agents."
+requires-python = ">=3.12"
+dependencies = [
+  "crawl4ai==0.9.2",
+  "mcp>=2.0,<3",
+  "pydantic>=2.11,<3",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.4,<9",
+  "pytest-asyncio>=1.1,<2",
+]
+
+[project.scripts]
+agentictools-mcp = "agentictools.mcp_server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentictools"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+asyncio_mode = "auto"
+testpaths = ["tests"]

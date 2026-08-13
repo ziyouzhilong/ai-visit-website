@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Web Archive"
+  short_description: "Discover and read public webpages as clean Markdown"
+  default_prompt: "Use $agent-web-archive to discover a website and read relevant public pages as source-attributed Markdown."
