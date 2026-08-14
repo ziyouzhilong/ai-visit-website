@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "agentictools"
 version = "0.2.0"
-description = "Provider-neutral web discovery, Markdown capture, deduplicated archiving, and search tools for AI agents."
+description = "AI Visit website: provider-neutral web discovery, Markdown capture, deduplicated archiving, and search for AI agents."
 requires-python = ">=3.12"
 dependencies = [
   "crawl4ai==0.9.2",

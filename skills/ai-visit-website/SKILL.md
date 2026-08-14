@@ -1,9 +1,9 @@
 ---
-name: agent-web-archive
-description: Discover public website structure, read public webpages as clean Markdown, explicitly archive agent-approved pages with content-hash deduplication, and search saved Markdown through Agent Web Archive MCP tools. Use when an agent needs to inspect navigation, feeds, sitemaps, or internal links; choose and capture pages relevant to a natural-language research goal; preserve reviewed source material; retrieve prior captures by text, source, tag, time, or hash; or read an archive resource without selectors, browser-form actions, or model-provider-specific logic.
+name: ai-visit-website
+description: Discover public website structure, read public webpages as clean Markdown, explicitly archive agent-approved pages with content-hash deduplication, and search saved Markdown through AI Visit website MCP tools. Use when an agent needs to inspect navigation, feeds, sitemaps, or internal links; choose and capture pages relevant to a natural-language research goal; preserve reviewed source material; retrieve prior captures by text, source, tag, time, or hash; or read an archive resource without selectors, browser-form actions, or model-provider-specific logic.
 ---
 
-# Agent Web Archive
+# AI Visit website
 
 Use the MCP tools to collect and preserve evidence. Keep editorial judgment in the calling agent.
 

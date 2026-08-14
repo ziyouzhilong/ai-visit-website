@@ -61,7 +61,7 @@ async def test_page_save_writes_stable_frontmatter_and_searchable_document(
     assert 'source: https://example.com/articles/one' in stored
     assert 'captured_at: \'2026-08-13T10:30:00Z\'' in stored
     assert 'content_hash: sha256:' in stored
-    assert 'generator: agent-web-archive' in stored
+    assert 'generator: ai-visit-website' in stored
     assert stored.endswith(request().markdown + "\n")
 
     document = archive.read_document(result.document_id)

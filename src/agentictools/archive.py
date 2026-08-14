@@ -298,7 +298,7 @@ class MarkdownArchive:
             "task_id": record["task_id"],
             "content_hash": record["content_hash"],
             "tags": record["tags"],
-            "generator": "agent-web-archive",
+            "generator": "ai-visit-website",
         }
         metadata = {key: value for key, value in metadata.items() if value is not None}
         frontmatter = yaml.safe_dump(

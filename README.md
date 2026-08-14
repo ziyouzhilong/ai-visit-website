@@ -1,6 +1,6 @@
-# Agentic Tools
+# AI Visit website
 
-`agentictools` is an independent, provider-neutral core for agent-driven web discovery and Markdown capture. Milestones A and B expose four operations through a local MCP stdio server:
+`AI Visit website` is an independent, provider-neutral tool for agent-driven web discovery and Markdown capture. Its internal Python package and compatibility command remain `agentictools` and `agentictools-mcp`. Milestones A and B expose four operations through a local MCP stdio server:
 
 - `site_discover`: returns navigation, RSS/Atom, sitemap, and internal-link evidence.
 - `page_read`: returns clean Markdown, source metadata, a SHA-256 content hash, and structured failures.

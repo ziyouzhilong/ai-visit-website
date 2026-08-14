@@ -18,6 +18,8 @@ class AllowExamplePolicy:
 
 def test_mcp_server_exposes_milestone_a_and_b_contracts() -> None:
     server = create_server()
+    assert server.name == "ai-visit-website"
+    assert server.title == "AI Visit website"
     tools = server._tool_manager.list_tools()
 
     assert {tool.name for tool in tools} == {
