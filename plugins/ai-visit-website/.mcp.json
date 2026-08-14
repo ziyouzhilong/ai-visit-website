@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "ai-visit-website": {
+      "command": "./bin/ai-visit-website-mcp",
+      "args": [],
+      "startup_timeout_sec": 600,
+      "tool_timeout_sec": 120
+    }
+  }
+}

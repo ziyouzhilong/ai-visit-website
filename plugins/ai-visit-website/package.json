@@ -1,0 +1,44 @@
+{
+  "name": "ai-visit-website",
+  "version": "0.2.0",
+  "description": "Local public-website discovery, Markdown capture, deduplicated archiving, and search for OpenClaw.",
+  "type": "module",
+  "files": [
+    ".codex-plugin",
+    ".mcp.json",
+    "bin",
+    "dist",
+    "mcp.json",
+    "openclaw.plugin.json",
+    "plugin.json",
+    "README.md",
+    "server",
+    "skills"
+  ],
+  "bin": {
+    "ai-visit-website-mcp": "./bin/ai-visit-website-mcp",
+    "ai-visit-website-setup": "./bin/ai-visit-website-setup"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.5.17"
+  },
+  "engines": {
+    "node": ">=22.22.3"
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.5.17",
+      "minGatewayVersion": "2026.5.17"
+    },
+    "install": {
+      "minHostVersion": ">=2026.5.17"
+    }
+  },
+  "scripts": {
+    "test": "node --check ./dist/index.js",
+    "pack:check": "npm pack --dry-run"
+  }
+}

@@ -28,6 +28,16 @@ Start the MCP stdio server with:
 
 An MCP host should launch that command directly and communicate over standard input/output. The server deliberately writes no user-facing output to stdout outside the MCP protocol.
 
+## Plugin packages
+
+The self-contained package at `plugins/ai-visit-website/` can be loaded by Codex, OpenClaw, or Hermes Agent. It contains each host's manifest plus one shared skill and one bundled copy of the Python MCP server:
+
+- Codex: `.codex-plugin/plugin.json` and `.mcp.json`
+- OpenClaw: `openclaw.plugin.json`, `package.json`, and `dist/index.js`
+- Hermes Agent / Agent Plugins v1: `plugin.json` and `mcp.json`
+
+The repository-scoped Codex marketplace is declared in `.agents/plugins/marketplace.json`. Plugin setup keeps its virtual environment, browser runtime, caches, and archive under the host-provided `PLUGIN_DATA` directory or the platform application-data directory; it does not require a global Python install.
+
 ## Archive location
 
 Set `AGENTICTOOLS_ARCHIVE_DIR` to choose the archive directory. Without it, macOS uses `~/Library/Application Support/AgenticTools/archive`; other platforms use the XDG data directory or `~/.local/share/agentictools/archive`.

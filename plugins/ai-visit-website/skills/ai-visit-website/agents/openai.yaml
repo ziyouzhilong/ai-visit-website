@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Visit website"
+  short_description: "Discover, archive, and search clean webpage Markdown"
+  default_prompt: "Use $ai-visit-website to discover relevant public pages, review them, save useful Markdown without duplicates, and search the archive."

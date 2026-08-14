@@ -1,0 +1,16 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ai-visit-website",
+  "version": "0.2.0",
+  "description": "Discover public websites, read clean Markdown, save reviewed pages without duplicates, and search a local archive.",
+  "author": {
+    "name": "AI Visit website"
+  },
+  "keywords": [
+    "web",
+    "markdown",
+    "archive",
+    "research",
+    "mcp"
+  ]
+}

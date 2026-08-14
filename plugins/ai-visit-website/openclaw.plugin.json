@@ -1,0 +1,24 @@
+{
+  "id": "ai-visit-website",
+  "name": "AI Visit website",
+  "description": "Discover public websites, read clean Markdown, save reviewed pages without duplicates, and search a local archive.",
+  "version": "0.2.0",
+  "activation": {
+    "onStartup": true
+  },
+  "skills": [
+    "./skills"
+  ],
+  "mcpServers": {
+    "ai-visit-website": {
+      "transport": "stdio",
+      "command": "./bin/ai-visit-website-mcp",
+      "args": []
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

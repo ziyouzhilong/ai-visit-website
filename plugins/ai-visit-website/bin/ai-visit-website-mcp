@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""Bootstrap or launch the bundled AI Visit website MCP stdio server."""
+
+from __future__ import annotations
+
+import argparse
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+
+PLUGIN_ROOT = Path(__file__).resolve().parents[1]
+SERVER_ROOT = PLUGIN_ROOT / "server"
+
+
+def data_dir() -> Path:
+    explicit = os.environ.get("AI_VISIT_WEBSITE_DATA_DIR")
+    if explicit:
+        return Path(explicit).expanduser().resolve()
+
+    plugin_data = os.environ.get("PLUGIN_DATA")
+    if plugin_data:
+        return Path(plugin_data).expanduser().resolve()
+
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / "AI Visit website"
+
+    xdg_data = os.environ.get("XDG_DATA_HOME")
+    base = Path(xdg_data).expanduser() if xdg_data else Path.home() / ".local" / "share"
+    return base / "ai-visit-website"
+
+
+def venv_dir(root: Path) -> Path:
+    explicit = os.environ.get("AI_VISIT_WEBSITE_VENV")
+    return Path(explicit).expanduser().resolve() if explicit else root / "venv"
+
+
+def venv_executable(venv: Path, name: str) -> Path:
+    directory = "Scripts" if os.name == "nt" else "bin"
+    suffix = ".exe" if os.name == "nt" else ""
+    return venv / directory / f"{name}{suffix}"
+
+
+def isolated_env(root: Path) -> dict[str, str]:
+    env = os.environ.copy()
+    paths = {
+        "TMPDIR": root / "tmp",
+        "XDG_CACHE_HOME": root / "cache",
+        "XDG_CONFIG_HOME": root / "config",
+        "XDG_DATA_HOME": root / "data",
+        "PIP_CACHE_DIR": root / "pip-cache",
+        "PLAYWRIGHT_BROWSERS_PATH": root / "browsers",
+        "NLTK_DATA": root / "nltk",
+        "HF_HOME": root / "huggingface",
+        "AGENTICTOOLS_ARCHIVE_DIR": root / "archive",
+    }
+    for key, path in paths.items():
+        path.mkdir(parents=True, exist_ok=True)
+        if key == "AGENTICTOOLS_ARCHIVE_DIR":
+            env.setdefault(key, str(path))
+        else:
+            env[key] = str(path)
+    return env
+
+
+def bootstrap(root: Path, venv: Path, *, with_browser: bool) -> None:
+    requested = os.environ.get("AI_VISIT_WEBSITE_BOOTSTRAP_PYTHON")
+    python = requested or shutil.which("python3.12")
+    if not python and sys.version_info >= (3, 12):
+        python = sys.executable
+    if not python:
+        raise SystemExit("Python 3.12 is required to set up AI Visit website.")
+
+    root.mkdir(parents=True, exist_ok=True)
+    env = isolated_env(root)
+    if not venv_executable(venv, "python").exists():
+        subprocess.run([python, "-m", "venv", str(venv)], check=True, env=env)
+
+    pip = venv_executable(venv, "pip")
+    subprocess.run(
+        [str(pip), "install", "--disable-pip-version-check", "--no-input", str(SERVER_ROOT)],
+        check=True,
+        env=env,
+    )
+    if with_browser:
+        subprocess.run([str(venv_executable(venv, "crawl4ai-setup"))], check=True, env=env)
+
+
+def launch(root: Path, venv: Path) -> None:
+    server = venv_executable(venv, "agentictools-mcp")
+    if not server.exists():
+        if os.environ.get("AI_VISIT_WEBSITE_AUTO_SETUP", "1") == "1":
+            with_browser = os.environ.get("AI_VISIT_WEBSITE_AUTO_SETUP_BROWSER", "1") == "1"
+            print("AI Visit website: preparing the isolated local runtime...", file=sys.stderr)
+            bootstrap(root, venv, with_browser=with_browser)
+        else:
+            raise SystemExit(
+                "AI Visit website is not set up. Run ./bin/ai-visit-website-setup first."
+            )
+
+    env = isolated_env(root)
+    env.setdefault("AGENTICTOOLS_ARCHIVE_DIR", str(root / "archive"))
+    os.execve(str(server), [str(server)], env)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--setup", action="store_true", help="Install the bundled Python server")
+    parser.add_argument(
+        "--skip-browser",
+        action="store_true",
+        help="Skip Crawl4AI browser setup (page_read may be unavailable)",
+    )
+    parser.add_argument("--print-paths", action="store_true", help="Print resolved plugin paths")
+    args = parser.parse_args()
+
+    root = data_dir()
+    venv = venv_dir(root)
+    if args.print_paths:
+        print(f"plugin_root={PLUGIN_ROOT}")
+        print(f"plugin_data={root}")
+        print(f"venv={venv}")
+        return
+    if args.setup:
+        bootstrap(root, venv, with_browser=not args.skip_browser)
+        print(f"AI Visit website runtime ready at {venv}")
+        return
+    launch(root, venv)
+
+
+if __name__ == "__main__":
+    main()

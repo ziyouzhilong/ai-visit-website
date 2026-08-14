@@ -1,0 +1,33 @@
+{
+  "name": "ai-visit-website",
+  "version": "0.2.0",
+  "description": "Discover public websites, read clean Markdown, save reviewed pages without duplicates, and search a local archive.",
+  "author": {
+    "name": "AI Visit website"
+  },
+  "keywords": [
+    "web",
+    "markdown",
+    "archive",
+    "research",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "AI Visit website",
+    "shortDescription": "Visit, archive, and search public websites",
+    "longDescription": "Discover public-site structure, convert selected pages to clean Markdown, explicitly archive reviewed content with SHA-256 deduplication, and search saved evidence locally.",
+    "developerName": "AI Visit website",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Discover this public website and identify the pages relevant to my goal.",
+      "Read this page as clean Markdown and show me the source metadata.",
+      "Search my saved website archive for evidence about this topic."
+    ]
+  }
+}

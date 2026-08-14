@@ -1,0 +1,20 @@
+{
+  "name": "personal",
+  "interface": {
+    "displayName": "AI Visit website local"
+  },
+  "plugins": [
+    {
+      "name": "ai-visit-website",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ai-visit-website"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
