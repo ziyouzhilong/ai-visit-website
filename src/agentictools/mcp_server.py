@@ -32,7 +32,7 @@ def create_server(service: AgentWebArchiveService | None = None) -> MCPServer:
             "browser batch, and call page_save only after the calling agent has approved "
             "the exact Markdown payload."
         ),
-        version="1.2.1",
+        version="1.2.2",
     )
     public_read = ToolAnnotations(
         readOnlyHint=True,

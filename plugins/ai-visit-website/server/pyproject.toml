@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentictools"
-version = "1.2.1"
+version = "1.2.2"
 description = "AI Visit website: discovery, public or authorized Chrome batch reading, Markdown archiving, and search for AI agents."
 requires-python = ">=3.12"
 dependencies = [

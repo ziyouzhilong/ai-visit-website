@@ -1,6 +1,19 @@
-# AI Visit website 1.2.1 后续开发交接
+# AI Visit website 1.2.2 后续开发交接
 
-更新时间：2026-08-20（Asia/Shanghai）
+更新时间：2026-08-21（Asia/Shanghai）
+
+## 2026-08-21 发布更新
+
+插件版本已更新并重新打包为 `1.2.2`，Chrome 扩展仍为 `1.5.0`。新增 `README_CN.md`、`CHANGELOG.md`、中文 Release notes 和常见问题解决方法；发布文件位于：
+
+```text
+release/ai-visit-website-1.2.2.tgz
+release/ai-visit-website-1.2.2.zip
+release/ai-visit-website-chrome-extension-1.5.0.zip
+release/SHA256SUMS-1.2.2.txt
+```
+
+发布包已完成独立环境 MCP 验收：`initialize` 返回 `1.2.2`，`tools/list` 返回 11 个工具，`archive_search` 真实调用成功。`--bridge-only` 仍未实现，OpenClaw/Hermes 真实宿主激活仍需分别验收。以下 1.2.1 内容保留为历史基线和问题证据。
 
 ## 0. 当前结论
 

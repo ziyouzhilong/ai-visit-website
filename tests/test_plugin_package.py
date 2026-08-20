@@ -32,7 +32,7 @@ def test_codex_plugin_manifest_and_marketplace_are_complete() -> None:
     marketplace = read_json(ROOT / ".agents" / "plugins" / "marketplace.json")
 
     assert manifest["name"] == "ai-visit-website"
-    assert manifest["version"].startswith("1.2.1+codex.")
+    assert manifest["version"].startswith("1.2.2+codex.")
     assert manifest["interface"]["displayName"] == "AI Visit website"
     assert manifest["skills"] == "./skills/"
     assert manifest["mcpServers"] == "./.mcp.json"
@@ -51,7 +51,7 @@ def test_openclaw_and_agent_plugins_manifests_share_one_runtime() -> None:
     npm = read_json(PLUGIN / "package.json")
 
     assert openclaw["id"] == portable["name"] == npm["name"] == "ai-visit-website"
-    assert openclaw["version"] == portable["version"] == npm["version"] == "1.2.1"
+    assert openclaw["version"] == portable["version"] == npm["version"] == "1.2.2"
     assert openclaw["skills"] == ["./skills"]
     assert openclaw["mcpServers"]["ai-visit-website"]["command"] == (
         "./bin/ai-visit-website-mcp"
@@ -94,7 +94,7 @@ def test_packaged_launcher_upgrades_a_stale_runtime(tmp_path: Path, monkeypatch)
     server = launcher.venv_executable(venv, "agentictools-mcp")
     server.parent.mkdir(parents=True)
     server.write_text("stale", encoding="utf-8")
-    versions = iter(["1.0.1", "1.2.1"])
+    versions = iter(["1.0.1", "1.2.2"])
     bootstraps: list[tuple[Path, Path, bool]] = []
 
     monkeypatch.setenv("AI_VISIT_WEBSITE_AUTO_SETUP", "1")
@@ -116,7 +116,7 @@ def test_packaged_launcher_upgrades_a_stale_runtime(tmp_path: Path, monkeypatch)
     with pytest.raises(RuntimeError, match="execve called"):
         launcher.launch(root, venv)
 
-    assert launcher.bundled_runtime_version() == "1.2.1"
+    assert launcher.bundled_runtime_version() == "1.2.2"
     assert bootstraps == [(root, venv, False)]
 
 
@@ -133,7 +133,7 @@ def test_packaged_launcher_rejects_a_stale_runtime_when_auto_setup_is_disabled(
     monkeypatch.setenv("AI_VISIT_WEBSITE_AUTO_SETUP", "0")
     monkeypatch.setattr(launcher, "installed_runtime_version", lambda _venv: "1.0.1")
 
-    with pytest.raises(SystemExit, match="runtime 1.0.1 does not match bundled version 1.2.1"):
+    with pytest.raises(SystemExit, match="runtime 1.0.1 does not match bundled version 1.2.2"):
         launcher.launch(root, venv)
 
 
@@ -158,8 +158,9 @@ def test_packaged_launcher_keeps_setup_output_off_mcp_stdout(tmp_path: Path, mon
 async def test_packaged_launcher_exposes_public_archive_and_browser_tools(tmp_path: Path) -> None:
     env = os.environ.copy()
     env["AI_VISIT_WEBSITE_DATA_DIR"] = str(tmp_path / "plugin-data")
-    env["AI_VISIT_WEBSITE_VENV"] = str(ROOT / ".venv")
-    env["AI_VISIT_WEBSITE_AUTO_SETUP"] = "0"
+    env["AI_VISIT_WEBSITE_VENV"] = str(tmp_path / "plugin-venv")
+    env["AI_VISIT_WEBSITE_AUTO_SETUP"] = "1"
+    env["AI_VISIT_WEBSITE_AUTO_SETUP_BROWSER"] = "0"
     parameters = StdioServerParameters(
         command=str(PLUGIN / "bin" / "ai-visit-website-mcp"),
         args=[],
@@ -172,7 +173,7 @@ async def test_packaged_launcher_exposes_public_archive_and_browser_tools(tmp_pa
             initialized = await session.initialize()
             listing = await session.list_tools()
 
-    assert initialized.server_info.version == "1.2.1"
+    assert initialized.server_info.version == "1.2.2"
     assert {tool.name for tool in listing.tools} == {
         "site_discover",
         "article_list",

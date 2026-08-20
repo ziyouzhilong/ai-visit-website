@@ -1,6 +1,6 @@
 {
   "name": "ai-visit-website",
-  "version": "1.2.1+codex.20260817235511",
+  "version": "1.2.2+codex.20260820170511",
   "description": "Discover article candidates, run authorized Chrome reading batches, save reviewed Markdown, and search a local archive.",
   "author": {
     "name": "AI Visit website"

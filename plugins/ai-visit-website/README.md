@@ -1,6 +1,6 @@
 # AI Visit website plugin
 
-This is one self-contained source bundle for Codex, OpenClaw, and Hermes Agent. All three hosts load the same `ai-visit-website` skill and start the same local MCP stdio server.
+Version 1.2.2 is one self-contained source bundle for Codex, OpenClaw, and Hermes Agent. All three hosts load the same `ai-visit-website` skill and start the same local MCP stdio server. Source, Chinese documentation, and releases are available at <https://github.com/ziyouzhilong/ai-visit-website>.
 
 ## Included formats
 
@@ -55,7 +55,14 @@ The extension is agent-first and contains no manual snippet manager or Reuters v
 
 ## Codex
 
-The source repository includes `.agents/plugins/marketplace.json`, so Codex can discover this package from the repository marketplace. Restart Codex, install `ai-visit-website`, start a new task, and invoke `$ai-visit-website`.
+The source repository includes `.agents/plugins/marketplace.json`. Add the GitHub marketplace, install the plugin, and then start a new task so Codex loads the updated Skill and tools:
+
+```bash
+codex plugin marketplace add ziyouzhilong/ai-visit-website --ref v1.2.2
+codex plugin add ai-visit-website@personal
+```
+
+If an unrelated marketplace named `personal` is already configured, inspect `codex plugin list --json` before changing it. Do not overwrite an unrelated source.
 
 ## OpenClaw
 
@@ -70,15 +77,15 @@ OpenClaw reads the native manifest and contributes the bundled skill and static 
 
 ## Hermes Agent
 
-Install the directory from its Git repository and enable it through the normal Hermes plugin workflow. Hermes reads the Agent Plugins v1 manifest, the namespaced skill, and the stdio MCP entry:
+Hermes reads the Agent Plugins v1 manifest, the namespaced skill, and the stdio MCP entry. The shared package schema is validated, but live Hermes activation has not been completed for this release; do not treat the following intended workflow as verified production evidence:
 
 ```bash
-hermes plugins install owner/repository --no-enable
+hermes plugins install ziyouzhilong/ai-visit-website --no-enable
 hermes plugins enable ai-visit-website
 hermes plugins doctor ai-visit-website --ci
 ```
 
-The repository placeholder must be replaced with the eventual Git hosting location. Local source validation can use `hermes plugins doctor <plugin-directory> --ci`.
+Local source validation can use `hermes plugins doctor <plugin-directory> --ci`.
 
 ## Tools and data
 
@@ -87,3 +94,13 @@ The server exposes `site_discover`, `article_list`, `page_read`, `browser_status
 Public and Chrome reads both reject credential-bearing, local, private, reserved, and link-local targets. Every website origin used by Chrome must also be explicitly authorized in extension Settings. `page_save` writes only agent-approved Markdown and deduplicates identical content with SHA-256.
 
 When a section page is blocked by robots policy or an automated-access challenge, `site_discover` may recover current link and title evidence from sitemaps declared by the site's public `robots.txt`. A successful result then uses adapter `robots-sitemap` and includes the original `robots_denied`, `bot_challenge`, or `access_denied` detail in `capture_warning`. This is discovery evidence, not proof that `page_read` accessed each article body.
+
+## Common failures
+
+- The extension Settings page does not need to stay open. Ask the agent to call `browser_status` before Chrome reads and proceed only when `configured` and `connected` are both true.
+- On a retryable offline status, wait 5-10 seconds and retry once. The Bridge currently belongs to the MCP process that created it; `--bridge-only` is not implemented in 1.2.2.
+- Eight articles is not a fixed plugin limit. Discovery defaults to 100 candidates, batches accept 1-20 URLs, and the calling agent selects the final set.
+- HTTP 401 usually means the extension token does not match `--print-bridge-token`; `domain_not_authorized` means the exact website origin is missing.
+- Reuters sitemap data is discovery-only. Do not turn a title, URL, or time into a body claim unless a page read succeeded.
+
+See the repository's [Chinese guide](https://github.com/ziyouzhilong/ai-visit-website/blob/main/README_CN.md) for complete setup and troubleshooting steps.
