@@ -1,7 +1,7 @@
 {
   "name": "ai-visit-website",
-  "version": "0.2.0",
-  "description": "Discover public websites, read clean Markdown, save reviewed pages without duplicates, and search a local archive.",
+  "version": "1.2.1+codex.20260817235511",
+  "description": "Discover article candidates, run authorized Chrome reading batches, save reviewed Markdown, and search a local archive.",
   "author": {
     "name": "AI Visit website"
   },
@@ -16,8 +16,8 @@
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "AI Visit website",
-    "shortDescription": "Visit, archive, and search public websites",
-    "longDescription": "Discover public-site structure, convert selected pages to clean Markdown, explicitly archive reviewed content with SHA-256 deduplication, and search saved evidence locally.",
+    "shortDescription": "Discover and batch-read authorized websites",
+    "longDescription": "Discover article candidates, convert public or user-authorized Chrome pages to clean Markdown, run bounded reading batches, explicitly archive reviewed content with SHA-256 deduplication, and search saved evidence locally.",
     "developerName": "AI Visit website",
     "category": "Productivity",
     "capabilities": [
@@ -27,6 +27,8 @@
     "defaultPrompt": [
       "Discover this public website and identify the pages relevant to my goal.",
       "Read this page as clean Markdown and show me the source metadata.",
+      "Use my paired Chrome session to read this authorized article.",
+      "Batch-read selected article URLs and report progress before I review them.",
       "Search my saved website archive for evidence about this topic."
     ]
   }

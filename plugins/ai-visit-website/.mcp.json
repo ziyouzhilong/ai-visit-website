@@ -3,8 +3,11 @@
     "ai-visit-website": {
       "command": "./bin/ai-visit-website-mcp",
       "args": [],
+      "env": {
+        "AI_VISIT_WEBSITE_PUBLIC_DNS_FALLBACK": "1"
+      },
       "startup_timeout_sec": 600,
-      "tool_timeout_sec": 120
+      "tool_timeout_sec": 180
     }
   }
 }

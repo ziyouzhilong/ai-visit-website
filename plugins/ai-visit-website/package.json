@@ -1,7 +1,7 @@
 {
   "name": "ai-visit-website",
-  "version": "0.2.0",
-  "description": "Local public-website discovery, Markdown capture, deduplicated archiving, and search for OpenClaw.",
+  "version": "1.2.1",
+  "description": "Article discovery, public or authorized Chrome batch reading, Markdown archiving, and search for OpenClaw.",
   "type": "module",
   "files": [
     ".codex-plugin",

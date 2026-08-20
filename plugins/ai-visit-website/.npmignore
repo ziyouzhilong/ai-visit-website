@@ -1,0 +1,8 @@
+**/__pycache__/
+**/*.py[cod]
+bin/__pycache__/
+bin/*.py[cod]
+server/src/agentictools/__pycache__/
+server/src/agentictools/adapters/__pycache__/
+server/src/agentictools/**/*.pyc
+.DS_Store

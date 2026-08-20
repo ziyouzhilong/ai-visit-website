@@ -9,7 +9,9 @@ This is one self-contained source bundle for Codex, OpenClaw, and Hermes Agent. 
 - Hermes Agent / Agent Plugins v1: `plugin.json` and `mcp.json`
 - Shared runtime: `server/`, `bin/`, and `skills/`
 
-The plugin needs Python 3.12. Its setup command creates a virtual environment and keeps Python packages, browser files, caches, and archived Markdown under the host-provided `PLUGIN_DATA` directory. When a host does not provide that variable, the launcher uses the current user's application-data directory.
+The plugin needs Python 3.12. Its setup command creates a virtual environment and keeps Python packages, browser files, caches, and archived Markdown under the host-provided `PLUGIN_DATA` directory. When a host does not provide that variable, the launcher uses the current user's application-data directory. The Chrome pairing token is intentionally kept in a stable user-level bridge directory shared across hosts so the printed token and the running MCP server cannot diverge.
+
+The packaged host manifests enable a guarded public-DNS fallback for transparent proxy environments that synthesize `198.18.0.0/15` addresses. The fallback accepts such a hostname only after public DNS independently resolves it exclusively to globally routable addresses. Literal benchmark-range URLs and all private, local, link-local, and other reserved targets remain blocked.
 
 ## Prepare the local server
 
@@ -21,7 +23,17 @@ Run this once from the installed plugin directory:
 
 This installs the bundled Python package and the Crawl4AI browser runtime. For a lightweight archive-only check, use `--skip-browser`.
 
-The MCP launcher can perform this setup automatically on first start. Set `AI_VISIT_WEBSITE_AUTO_SETUP=0` to require explicit setup instead, or `AI_VISIT_WEBSITE_AUTO_SETUP_BROWSER=0` to skip browser installation during automatic setup.
+The MCP launcher performs setup automatically on first start and upgrades an existing runtime whenever its installed version differs from the bundled server version. Installer output is redirected away from the MCP protocol stream. Set `AI_VISIT_WEBSITE_AUTO_SETUP=0` to require explicit setup instead, or `AI_VISIT_WEBSITE_AUTO_SETUP_BROWSER=0` to skip browser installation during automatic setup.
+
+## Pair the Chrome extension
+
+Start the MCP server once or call `browser_status`, then print the one-time local pairing values:
+
+```bash
+./bin/ai-visit-website-mcp --print-bridge-token
+```
+
+In the Chrome extension Settings, open **AI Agent Browser Bridge**, enter the port and token, add each authorized website origin (for example `https://www.reuters.com`), enable the bridge, and click **Check Connection**. The bridge listens only on `127.0.0.1`, opens one visible tab, never exports cookies or browser credentials, and stops on login, CAPTCHA, access-denied, paywall, or a redirect outside the allowlist.
 
 ## Codex
 
@@ -52,4 +64,8 @@ The repository placeholder must be replaced with the eventual Git hosting locati
 
 ## Tools and data
 
-The server exposes `site_discover`, `page_read`, `page_save`, and `archive_search`. It only captures public HTTP(S) pages and rejects credential-bearing, local, private, reserved, and link-local targets. `page_save` writes only agent-approved Markdown and deduplicates identical content with SHA-256.
+The server exposes `site_discover`, `article_list`, `page_read`, `browser_status`, `browser_page_read`, `browser_cancel`, `browser_batch_start`, `browser_batch_status`, `browser_batch_cancel`, `page_save`, and `archive_search`. `article_list` preserves discovery evidence without deciding importance. Browser batches accept 1-20 selected URLs, run one visible read at a time, expose progress/results, and can be canceled. Their status is retained only while the MCP process is running.
+
+Public and Chrome reads both reject credential-bearing, local, private, reserved, and link-local targets. Every website origin used by Chrome must also be explicitly authorized in extension Settings. `page_save` writes only agent-approved Markdown and deduplicates identical content with SHA-256.
+
+When a section page is blocked by robots policy or an automated-access challenge, `site_discover` may recover current link and title evidence from sitemaps declared by the site's public `robots.txt`. A successful result then uses adapter `robots-sitemap` and includes the original `robots_denied`, `bot_challenge`, or `access_denied` detail in `capture_warning`. This is discovery evidence, not proof that `page_read` accessed each article body.

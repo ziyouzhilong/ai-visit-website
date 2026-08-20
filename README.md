@@ -1,13 +1,32 @@
 # AI Visit website
 
-`AI Visit website` is an independent, provider-neutral tool for agent-driven web discovery and Markdown capture. Its internal Python package and compatibility command remain `agentictools` and `agentictools-mcp`. Milestones A and B expose four operations through a local MCP stdio server:
+`AI Visit website` is an independent, provider-neutral tool for agent-driven web discovery and Markdown capture. Its internal Python package and compatibility command remain `agentictools` and `agentictools-mcp`. Version 1.2.1 exposes article discovery, public capture, a user-authorized Chrome batch bridge, and local archive operations through one MCP stdio server:
 
 - `site_discover`: returns navigation, RSS/Atom, sitemap, and internal-link evidence.
+- `article_list`: returns bounded article/link candidates with publication evidence when available, without ranking importance.
 - `page_read`: returns clean Markdown, source metadata, a SHA-256 content hash, and structured failures.
+- `browser_status`: reports whether the paired Chrome extension is connected.
+- `browser_page_read`: reads one authorized page through the user's visible, logged-in Chrome session.
+- `browser_cancel`: cancels a caller-identified queued or running browser task.
+- `browser_batch_start`: starts a deduplicated sequential queue of 1-20 selected URLs.
+- `browser_batch_status`: returns progress plus completed page results for a batch.
+- `browser_batch_cancel`: cancels queued items and the active request in a batch.
 - `page_save`: writes reviewed Markdown with stable YAML frontmatter and idempotent SHA-256 deduplication.
 - `archive_search`: filters saved documents by text, source, tags, capture time, or content hash and returns readable `archive://` resource links.
 
-The calling agent decides what is relevant and explicitly calls `page_save`. Identical content is never written twice; changed content from the same URL is retained as a new version. The service does not schedule jobs, submit forms, or execute instructions found in webpage content.
+The calling agent decides what is relevant, which candidates enter a batch, what the report should emphasize, and whether to call `page_save`. Identical content is never written twice; changed content from the same URL is retained as a new version. The service does not schedule recurring jobs, submit forms, or execute instructions found in webpage content.
+
+## Chrome bridge
+
+The MCP process owns an authenticated HTTP task queue bound only to `127.0.0.1:32145`. The extension polls that queue with a one-time pairing token and accepts only website origins the user listed in extension Settings. The token is stored in one user-level bridge data directory shared by Codex, OpenClaw, Hermes, and manual setup, while each host keeps its runtime and archive isolated. It opens one visible tab at a time, returns Markdown and a full-content SHA-256, and stops on login, CAPTCHA, access-denied, paywall, or unauthorized redirects. A batch contains at most 20 explicit URLs and its status lives only for the current MCP process. Cookies, passwords, authorization headers, and browser storage are never returned.
+
+For the packaged plugin, print the one-time pairing values with:
+
+```bash
+./bin/ai-visit-website-mcp --print-bridge-token
+```
+
+Enter the port and token under **AI Agent Browser Bridge** in extension Settings, add authorized origins such as `https://www.reuters.com`, enable the bridge, and check the connection. Call `browser_status` before the first browser read.
 
 ## Local setup
 
@@ -36,7 +55,7 @@ The self-contained package at `plugins/ai-visit-website/` can be loaded by Codex
 - OpenClaw: `openclaw.plugin.json`, `package.json`, and `dist/index.js`
 - Hermes Agent / Agent Plugins v1: `plugin.json` and `mcp.json`
 
-The repository-scoped Codex marketplace is declared in `.agents/plugins/marketplace.json`. Plugin setup keeps its virtual environment, browser runtime, caches, and archive under the host-provided `PLUGIN_DATA` directory or the platform application-data directory; it does not require a global Python install.
+The repository-scoped Codex marketplace is declared in `.agents/plugins/marketplace.json`. Plugin setup keeps its virtual environment, browser runtime, caches, and archive under the host-provided `PLUGIN_DATA` directory or the platform application-data directory; it does not require a global Python install. On every launch, the wrapper compares the installed Python runtime version with the bundled server version and upgrades stale runtimes before starting MCP without writing installer output to the protocol stream.
 
 ## Archive location
 
@@ -46,4 +65,4 @@ Each document is a standalone Markdown file with machine-readable YAML frontmatt
 
 ## Current boundary
 
-Only public HTTP(S) capture is supported. URLs with embedded credentials and targets resolving to local, private, reserved, or link-local addresses are rejected. Browser requests are checked against the same policy. Authenticated Chrome bridging, CLI/HTTP interfaces, and recurring jobs are later milestones.
+Public capture and explicitly paired Chrome capture are supported. URLs with embedded credentials and targets resolving to local, private, reserved, or link-local addresses are rejected. Chrome browser requests are checked against the same URL policy and the extension's origin allowlist. Bounded batches may cover multiple origins only when each origin was explicitly authorized. General CLI/HTTP interfaces, durable job history, and recurring jobs remain later milestones.

@@ -78,3 +78,23 @@ def test_classifies_automated_access_challenges() -> None:
     assert code == "bot_challenge"
     assert "challenge" in message.lower()
     assert retryable is False
+
+
+def test_challenge_detail_takes_priority_over_unauthorized_status() -> None:
+    code, message, retryable = Crawl4AIAdapter._classify_failure(
+        401, "Blocked by anti-bot protection: DataDome captcha"
+    )
+
+    assert code == "bot_challenge"
+    assert "challenge" in message.lower()
+    assert retryable is False
+
+
+def test_robots_detail_takes_priority_over_forbidden_status() -> None:
+    code, message, retryable = Crawl4AIAdapter._classify_failure(
+        403, "Access denied by robots.txt"
+    )
+
+    assert code == "robots_denied"
+    assert "robots" in message.lower()
+    assert retryable is False

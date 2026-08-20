@@ -6,7 +6,8 @@
       "command": "./bin/ai-visit-website-mcp",
       "args": [],
       "env": {
-        "AGENTICTOOLS_ARCHIVE_DIR": "${PLUGIN_DATA}/archive"
+        "AGENTICTOOLS_ARCHIVE_DIR": "${PLUGIN_DATA}/archive",
+        "AI_VISIT_WEBSITE_PUBLIC_DNS_FALLBACK": "1"
       },
       "cwd": "${PLUGIN_ROOT}"
     }

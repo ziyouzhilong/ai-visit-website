@@ -7,6 +7,7 @@ import argparse
 import os
 from pathlib import Path
 import shutil
+import secrets
 import subprocess
 import sys
 
@@ -32,6 +33,17 @@ def data_dir() -> Path:
     return base / "ai-visit-website"
 
 
+def bridge_data_dir() -> Path:
+    explicit = os.environ.get("AI_VISIT_WEBSITE_BRIDGE_DATA_DIR")
+    if explicit:
+        return Path(explicit).expanduser().resolve()
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / "AI Visit website"
+    xdg_data = os.environ.get("XDG_DATA_HOME")
+    base = Path(xdg_data).expanduser() if xdg_data else Path.home() / ".local" / "share"
+    return base / "ai-visit-website"
+
+
 def venv_dir(root: Path) -> Path:
     explicit = os.environ.get("AI_VISIT_WEBSITE_VENV")
     return Path(explicit).expanduser().resolve() if explicit else root / "venv"
@@ -43,8 +55,59 @@ def venv_executable(venv: Path, name: str) -> Path:
     return venv / directory / f"{name}{suffix}"
 
 
+def bundled_runtime_version() -> str:
+    pyproject = SERVER_ROOT / "pyproject.toml"
+    in_project = False
+    for raw_line in pyproject.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if line == "[project]":
+            in_project = True
+            continue
+        if in_project and line.startswith("["):
+            break
+        if in_project and line.startswith("version") and "=" in line:
+            value = line.split("=", 1)[1].strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in {"\"", "'"}:
+                return value[1:-1]
+    raise SystemExit(f"Cannot determine the bundled runtime version from {pyproject}.")
+
+
+def installed_runtime_version(venv: Path) -> str | None:
+    python = venv_executable(venv, "python")
+    if not python.exists():
+        return None
+    result = subprocess.run(
+        [
+            str(python),
+            "-c",
+            "from importlib.metadata import version; print(version('agentictools'))",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def bridge_token() -> tuple[Path, str]:
+    root = bridge_data_dir()
+    path = root / "browser-bridge-token"
+    if path.exists():
+        token = path.read_text(encoding="utf-8").strip()
+        if len(token) < 32:
+            raise SystemExit("The browser bridge token file is invalid.")
+        return path, token
+    root.mkdir(parents=True, exist_ok=True)
+    token = secrets.token_urlsafe(32)
+    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+        handle.write(token + "\n")
+    return path, token
+
+
 def isolated_env(root: Path) -> dict[str, str]:
     env = os.environ.copy()
+    env.setdefault("AI_VISIT_WEBSITE_BRIDGE_DATA_DIR", str(bridge_data_dir()))
     paths = {
         "TMPDIR": root / "tmp",
         "XDG_CACHE_HOME": root / "cache",
@@ -76,28 +139,67 @@ def bootstrap(root: Path, venv: Path, *, with_browser: bool) -> None:
     root.mkdir(parents=True, exist_ok=True)
     env = isolated_env(root)
     if not venv_executable(venv, "python").exists():
-        subprocess.run([python, "-m", "venv", str(venv)], check=True, env=env)
+        subprocess.run(
+            [python, "-m", "venv", str(venv)],
+            check=True,
+            env=env,
+            stdout=sys.stderr,
+        )
 
     pip = venv_executable(venv, "pip")
     subprocess.run(
-        [str(pip), "install", "--disable-pip-version-check", "--no-input", str(SERVER_ROOT)],
+        [
+            str(pip),
+            "install",
+            "--disable-pip-version-check",
+            "--no-input",
+            "--upgrade",
+            str(SERVER_ROOT),
+        ],
         check=True,
         env=env,
+        stdout=sys.stderr,
     )
     if with_browser:
-        subprocess.run([str(venv_executable(venv, "crawl4ai-setup"))], check=True, env=env)
+        subprocess.run(
+            [str(venv_executable(venv, "crawl4ai-setup"))],
+            check=True,
+            env=env,
+            stdout=sys.stderr,
+        )
 
 
 def launch(root: Path, venv: Path) -> None:
     server = venv_executable(venv, "agentictools-mcp")
-    if not server.exists():
+    expected_version = bundled_runtime_version()
+    current_version = installed_runtime_version(venv)
+    if not server.exists() or current_version != expected_version:
         if os.environ.get("AI_VISIT_WEBSITE_AUTO_SETUP", "1") == "1":
             with_browser = os.environ.get("AI_VISIT_WEBSITE_AUTO_SETUP_BROWSER", "1") == "1"
-            print("AI Visit website: preparing the isolated local runtime...", file=sys.stderr)
+            if current_version is None:
+                message = "preparing the isolated local runtime"
+            else:
+                message = (
+                    "upgrading the isolated local runtime "
+                    f"from {current_version} to {expected_version}"
+                )
+            print(f"AI Visit website: {message}...", file=sys.stderr)
             bootstrap(root, venv, with_browser=with_browser)
         else:
+            if current_version is None:
+                detail = "is not set up"
+            else:
+                detail = (
+                    f"runtime {current_version} does not match bundled version "
+                    f"{expected_version}"
+                )
+            raise SystemExit(f"AI Visit website {detail}. Run ./bin/ai-visit-website-setup first.")
+
+        current_version = installed_runtime_version(venv)
+        if not server.exists() or current_version != expected_version:
             raise SystemExit(
-                "AI Visit website is not set up. Run ./bin/ai-visit-website-setup first."
+                "AI Visit website runtime setup did not install the bundled version "
+                f"{expected_version}."
             )
 
     env = isolated_env(root)
@@ -114,6 +216,11 @@ def main() -> None:
         help="Skip Crawl4AI browser setup (page_read may be unavailable)",
     )
     parser.add_argument("--print-paths", action="store_true", help="Print resolved plugin paths")
+    parser.add_argument(
+        "--print-bridge-token",
+        action="store_true",
+        help="Print the local Chrome bridge pairing token for one-time extension setup",
+    )
     args = parser.parse_args()
 
     root = data_dir()
@@ -122,6 +229,12 @@ def main() -> None:
         print(f"plugin_root={PLUGIN_ROOT}")
         print(f"plugin_data={root}")
         print(f"venv={venv}")
+        return
+    if args.print_bridge_token:
+        path, token = bridge_token()
+        print(f"bridge_port={os.environ.get('AI_VISIT_WEBSITE_BRIDGE_PORT', '32145')}")
+        print(f"bridge_token_file={path}")
+        print(f"bridge_token={token}")
         return
     if args.setup:
         bootstrap(root, venv, with_browser=not args.skip_browser)

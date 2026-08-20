@@ -129,6 +129,11 @@ class Crawl4AIAdapter:
     def _classify_failure(
         status_code: int | None, error_message: str | None
     ) -> tuple[str, str, bool]:
+        lowered = (error_message or "").lower()
+        if any(marker in lowered for marker in ("anti-bot", "captcha", "datadome", "challenge")):
+            return "bot_challenge", "The site presented an automated-access challenge.", False
+        if "robot" in lowered:
+            return "robots_denied", "The site's robots policy denied capture.", False
         if status_code in {401, 403}:
             return "access_denied", f"The origin returned HTTP {status_code}.", False
         if status_code == 404:
@@ -137,9 +142,4 @@ class Crawl4AIAdapter:
             return "rate_limited", "The origin returned HTTP 429.", True
         if status_code is not None and status_code >= 500:
             return "upstream_error", f"The origin returned HTTP {status_code}.", True
-        lowered = (error_message or "").lower()
-        if "robot" in lowered:
-            return "robots_denied", "The site's robots policy denied capture.", False
-        if "anti-bot" in lowered or "captcha" in lowered:
-            return "bot_challenge", "The site presented an automated-access challenge.", False
         return "capture_failed", "The browser adapter could not capture the page.", True

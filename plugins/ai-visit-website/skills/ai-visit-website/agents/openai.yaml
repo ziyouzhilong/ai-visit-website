@@ -1,4 +1,4 @@
 interface:
   display_name: "AI Visit website"
-  short_description: "Discover, archive, and search clean webpage Markdown"
-  default_prompt: "Use $ai-visit-website to discover relevant public pages, review them, save useful Markdown without duplicates, and search the archive."
+  short_description: "Discover and batch-read articles for sourced reports"
+  default_prompt: "Use $ai-visit-website to discover and batch-read selected articles, then prepare a source-backed report."

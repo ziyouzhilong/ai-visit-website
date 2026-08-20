@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html style="color-scheme: light dark;">
+<head>
+  <meta charset="UTF-8">
+  <title>Snippet Saver — Settings</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div id="settingsContainer" style="max-width: 600px; margin: 30px auto; padding: 20px;">
+    <h2>Settings</h2>
+
+    <!-- Keyboard Shortcuts -->
+    <section style="margin-top: 24px;">
+      <h3>Keyboard Shortcuts</h3>
+      <p>You can customize the extension shortcut from Chrome’s shortcut settings.</p>
+      <button id="openShortcutBtn" class="btn-primary">Open Shortcut Settings</button>
+    </section>
+
+    <!-- Import / Export -->
+    <section style="margin-top: 32px;">
+      <h3>Import / Export Snippets</h3>
+
+      <div style="margin-top: 12px;">
+        <button id="exportBtn" class="btn-primary">Export Snippets</button>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <input type="file" id="importFileInput" accept=".json" style="margin-bottom: 8px;">
+        <button id="importBtn" class="btn-secondary">Import Snippets</button>
+      </div>
+
+      <p style="font-size: 12px; opacity: 0.7; margin-top: 6px;">
+        Importing will validate the file before applying changes.
+      </p>
+    </section>
+
+    <!-- Tag Manager (moved from tags.html) -->
+    <section style="margin-top: 32px;">
+      <h3>Tag Manager</h3>
+
+      <!-- Add Tag -->
+      <div style="margin-top: 12px;">
+        <h4>Add New Tag</h4>
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <input id="newTagInput" class="bootstrap-input" placeholder="Tag name">
+          <button id="addTagBtn" class="btn-primary">Add</button>
+        </div>
+      </div>
+
+      <!-- Tag List -->
+      <div style="margin-top: 20px;">
+        <h4>Existing Tags</h4>
+        <ul id="tagList" style="list-style: none; padding-left: 0;"></ul>
+      </div>
+    </section>
+
+    <section style="margin-top: 32px;">
+      <h3>Reuters Browser Validation</h3>
+      <p>
+        Test whether the extension can read Reuters articles through your existing
+        Chrome session. The test is read-only, uses one visible tab, and stops on
+        login, CAPTCHA, access-denied, or paywall screens.
+      </p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button id="openReutersBtn" class="btn-secondary">Open Reuters Business</button>
+        <button id="openReutersValidationBtn" class="btn-primary">Open Validation</button>
+      </div>
+    </section>
+
+    <section style="margin-top: 32px;">
+      <h3>AI Agent Browser Bridge</h3>
+      <p>
+        Pair this extension with the local AI Visit website plugin. The bridge can
+        open visible tabs and read only the website origins listed below. It never
+        exports cookies, passwords, or browser tokens.
+      </p>
+      <label style="display: flex; gap: 8px; align-items: center; margin-top: 12px;">
+        <input id="agentBridgeEnabled" type="checkbox">
+        Enable the local browser bridge
+      </label>
+      <label style="display: block; margin-top: 12px;">
+        Local port
+        <input id="agentBridgePort" class="bootstrap-input" type="number" min="1024" max="65535" value="32145">
+      </label>
+      <label style="display: block; margin-top: 12px;">
+        Pairing token
+        <input id="agentBridgeToken" class="bootstrap-input" type="password" autocomplete="off" placeholder="Paste the local bridge token">
+      </label>
+      <label style="display: block; margin-top: 12px;">
+        Authorized website origins, one per line
+        <textarea id="agentBridgeAllowedOrigins" class="bootstrap-input" rows="5" placeholder="https://www.reuters.com"></textarea>
+      </label>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+        <button id="saveAgentBridgeBtn" class="btn-primary">Save Bridge Settings</button>
+        <button id="checkAgentBridgeBtn" class="btn-secondary">Check Connection</button>
+      </div>
+      <p id="agentBridgeStatus" style="font-size: 12px; margin-top: 8px;" aria-live="polite">
+        Bridge is not configured.
+      </p>
+    </section>
+
+    <!-- About -->
+    <section style="margin-top: 32px;">
+      <h3>About</h3>
+      <p>Snippet Saver with Tags & Folders</p>
+      <p>Version: <strong>1.5.0</strong></p>
+
+      <!--<button id="openChangelogBtn" class="btn-secondary">View Changelog</button>-->
+    </section>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

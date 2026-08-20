@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Snippet Saver with Tags & Folders",
+  "version": "1.5.0",
+  "description": "Save the current webpage as organized Markdown snippets with folders, tags, notes, search, sorting, and a full settings page.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "contextMenus",
+    "scripting",
+    "tabs",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_title": "Save current page as Markdown"
+  },
+  "options_page": "settings.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "save-snippet": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S"
+      },
+      "description": "Save current page as Markdown"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png",
+	"1024": "icons/icon1024.png"
+  }
+}

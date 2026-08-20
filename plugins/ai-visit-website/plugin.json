@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "ai-visit-website",
-  "version": "0.2.0",
-  "description": "Discover public websites, read clean Markdown, save reviewed pages without duplicates, and search a local archive.",
+  "version": "1.2.1",
+  "description": "Discover article candidates, batch-read public or authorized Chrome pages, save reviewed Markdown, and search a local archive.",
   "author": {
     "name": "AI Visit website"
   },
