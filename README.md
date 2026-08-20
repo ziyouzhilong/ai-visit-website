@@ -26,7 +26,7 @@ For the packaged plugin, print the one-time pairing values with:
 ./bin/ai-visit-website-mcp --print-bridge-token
 ```
 
-Enter the port and token under **AI Agent Browser Bridge** in extension Settings, add authorized origins such as `https://www.reuters.com`, enable the bridge, and check the connection. Call `browser_status` before the first browser read.
+Open the **AI Visit website** extension to reach its agent-first Browser Bridge settings. Enter the port and token, add authorized origins such as `https://www.reuters.com`, enable the bridge, and check the connection. The extension has no manual snippet capture, tag manager, import/export, or Reuters validation UI. Call `browser_status` before the first browser read.
 
 ## Local setup
 

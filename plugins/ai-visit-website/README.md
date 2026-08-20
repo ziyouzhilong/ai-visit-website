@@ -33,7 +33,7 @@ Start the MCP server once or call `browser_status`, then print the one-time loca
 ./bin/ai-visit-website-mcp --print-bridge-token
 ```
 
-In the Chrome extension Settings, open **AI Agent Browser Bridge**, enter the port and token, add each authorized website origin (for example `https://www.reuters.com`), enable the bridge, and click **Check Connection**. The bridge listens only on `127.0.0.1`, opens one visible tab, never exports cookies or browser credentials, and stops on login, CAPTCHA, access-denied, paywall, or a redirect outside the allowlist.
+Open the **AI Visit website** Chrome extension, enter the Browser Bridge port and token, add each authorized website origin (for example `https://www.reuters.com`), enable the bridge, and click **Check connection**. The extension is agent-first and contains no manual snippet manager or Reuters validation page. The bridge listens only on `127.0.0.1`, opens one visible tab, never exports cookies or browser credentials, and stops on login, CAPTCHA, access-denied, paywall, or a redirect outside the allowlist.
 
 ## Codex
 

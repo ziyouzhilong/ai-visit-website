@@ -1,114 +1,96 @@
 <!DOCTYPE html>
-<html style="color-scheme: light dark;">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Snippet Saver — Settings</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Visit website — Browser Bridge</title>
+  <link rel="stylesheet" href="settings.css">
 </head>
-
 <body>
-  <div id="settingsContainer" style="max-width: 600px; margin: 30px auto; padding: 20px;">
-    <h2>Settings</h2>
-
-    <!-- Keyboard Shortcuts -->
-    <section style="margin-top: 24px;">
-      <h3>Keyboard Shortcuts</h3>
-      <p>You can customize the extension shortcut from Chrome’s shortcut settings.</p>
-      <button id="openShortcutBtn" class="btn-primary">Open Shortcut Settings</button>
-    </section>
-
-    <!-- Import / Export -->
-    <section style="margin-top: 32px;">
-      <h3>Import / Export Snippets</h3>
-
-      <div style="margin-top: 12px;">
-        <button id="exportBtn" class="btn-primary">Export Snippets</button>
+  <main class="shell">
+    <header class="hero">
+      <div class="product-mark" aria-hidden="true">AI</div>
+      <div>
+        <p class="eyebrow">Chrome browser bridge</p>
+        <h1>AI Visit website</h1>
+        <p class="lede">
+          Connect an AI agent to pages you explicitly authorize in this Chrome profile.
+          Page reads are requested by the local plugin; this extension has no manual capture workflow.
+        </p>
       </div>
+    </header>
 
-      <div style="margin-top: 12px;">
-        <input type="file" id="importFileInput" accept=".json" style="margin-bottom: 8px;">
-        <button id="importBtn" class="btn-secondary">Import Snippets</button>
-      </div>
-
-      <p style="font-size: 12px; opacity: 0.7; margin-top: 6px;">
-        Importing will validate the file before applying changes.
-      </p>
-    </section>
-
-    <!-- Tag Manager (moved from tags.html) -->
-    <section style="margin-top: 32px;">
-      <h3>Tag Manager</h3>
-
-      <!-- Add Tag -->
-      <div style="margin-top: 12px;">
-        <h4>Add New Tag</h4>
-        <div style="display: flex; gap: 8px; margin-top: 8px;">
-          <input id="newTagInput" class="bootstrap-input" placeholder="Tag name">
-          <button id="addTagBtn" class="btn-primary">Add</button>
+    <section class="status-card" aria-labelledby="connection-heading">
+      <div class="status-copy">
+        <span id="statusIndicator" class="status-indicator" data-state="idle" aria-hidden="true"></span>
+        <div>
+          <h2 id="connection-heading">Bridge status</h2>
+          <p id="agentBridgeStatus" aria-live="polite">Loading local settings…</p>
         </div>
       </div>
+      <button id="checkAgentBridgeBtn" class="button button-secondary" type="button">
+        Check connection
+      </button>
+    </section>
 
-      <!-- Tag List -->
-      <div style="margin-top: 20px;">
-        <h4>Existing Tags</h4>
-        <ul id="tagList" style="list-style: none; padding-left: 0;"></ul>
+    <section class="panel" aria-labelledby="pairing-heading">
+      <div class="panel-heading">
+        <div>
+          <p class="step-label">Local pairing</p>
+          <h2 id="pairing-heading">Agent bridge settings</h2>
+        </div>
+        <label class="switch-row" for="agentBridgeEnabled">
+          <input id="agentBridgeEnabled" type="checkbox">
+          <span>Enabled</span>
+        </label>
+      </div>
+
+      <div class="form-grid">
+        <label class="field" for="agentBridgePort">
+          <span>Local port</span>
+          <input id="agentBridgePort" type="number" min="1024" max="65535" value="32145" inputmode="numeric">
+          <small>Loopback only: <code>127.0.0.1</code></small>
+        </label>
+
+        <label class="field" for="agentBridgeToken">
+          <span>Pairing token</span>
+          <div class="token-field">
+            <input id="agentBridgeToken" type="password" autocomplete="off" spellcheck="false" placeholder="Paste the local bridge token">
+            <button id="toggleTokenBtn" class="text-button" type="button" aria-pressed="false">Show</button>
+          </div>
+          <small>The token stays in local extension storage and is never shown in status output.</small>
+        </label>
+
+        <label class="field field-wide" for="agentBridgeAllowedOrigins">
+          <span>Authorized website origins</span>
+          <textarea id="agentBridgeAllowedOrigins" rows="6" spellcheck="false" placeholder="https://example.com&#10;https://www.reuters.com"></textarea>
+          <small>One exact HTTP(S) origin per line. Redirects outside this list are rejected.</small>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="saveAgentBridgeBtn" class="button button-primary" type="button">
+          Save bridge settings
+        </button>
       </div>
     </section>
 
-    <section style="margin-top: 32px;">
-      <h3>Reuters Browser Validation</h3>
-      <p>
-        Test whether the extension can read Reuters articles through your existing
-        Chrome session. The test is read-only, uses one visible tab, and stops on
-        login, CAPTCHA, access-denied, or paywall screens.
-      </p>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button id="openReutersBtn" class="btn-secondary">Open Reuters Business</button>
-        <button id="openReutersValidationBtn" class="btn-primary">Open Validation</button>
-      </div>
+    <section class="panel boundary-panel" aria-labelledby="boundary-heading">
+      <p class="step-label">Agent-first operation</p>
+      <h2 id="boundary-heading">What this extension does</h2>
+      <ul class="boundary-list">
+        <li>Claims explicit page-read tasks from the local AI Visit website bridge.</li>
+        <li>Uses one visible Chrome tab and returns readable Markdown to the requesting agent.</li>
+        <li>Stops on login, CAPTCHA, access-denied, paywall, or unauthorized redirects.</li>
+        <li>Never returns cookies, passwords, authorization headers, or browser storage.</li>
+      </ul>
     </section>
 
-    <section style="margin-top: 32px;">
-      <h3>AI Agent Browser Bridge</h3>
-      <p>
-        Pair this extension with the local AI Visit website plugin. The bridge can
-        open visible tabs and read only the website origins listed below. It never
-        exports cookies, passwords, or browser tokens.
-      </p>
-      <label style="display: flex; gap: 8px; align-items: center; margin-top: 12px;">
-        <input id="agentBridgeEnabled" type="checkbox">
-        Enable the local browser bridge
-      </label>
-      <label style="display: block; margin-top: 12px;">
-        Local port
-        <input id="agentBridgePort" class="bootstrap-input" type="number" min="1024" max="65535" value="32145">
-      </label>
-      <label style="display: block; margin-top: 12px;">
-        Pairing token
-        <input id="agentBridgeToken" class="bootstrap-input" type="password" autocomplete="off" placeholder="Paste the local bridge token">
-      </label>
-      <label style="display: block; margin-top: 12px;">
-        Authorized website origins, one per line
-        <textarea id="agentBridgeAllowedOrigins" class="bootstrap-input" rows="5" placeholder="https://www.reuters.com"></textarea>
-      </label>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
-        <button id="saveAgentBridgeBtn" class="btn-primary">Save Bridge Settings</button>
-        <button id="checkAgentBridgeBtn" class="btn-secondary">Check Connection</button>
-      </div>
-      <p id="agentBridgeStatus" style="font-size: 12px; margin-top: 8px;" aria-live="polite">
-        Bridge is not configured.
-      </p>
-    </section>
-
-    <!-- About -->
-    <section style="margin-top: 32px;">
-      <h3>About</h3>
-      <p>Snippet Saver with Tags & Folders</p>
-      <p>Version: <strong>1.5.0</strong></p>
-
-      <!--<button id="openChangelogBtn" class="btn-secondary">View Changelog</button>-->
-    </section>
-  </div>
+    <footer>
+      <span>AI Visit website Chrome extension</span>
+      <span>Version <strong id="extensionVersion">1.5.0</strong></span>
+    </footer>
+  </main>
 
   <script src="settings.js"></script>
 </body>

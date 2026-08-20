@@ -18,7 +18,30 @@
 
 当前首要生产问题是 Bridge 生命周期：Bridge 由某个 MCP 进程在第一次调用 `browser_status` 或浏览器读取工具时按需创建，没有正式手动常驻入口。MCP 进程退出或切换后，扩展可能无法连接。下一步应实现 `--bridge-only`，并补齐诊断、文档和验收。
 
-当前 1.2.1 代码、文档、测试和发布包仍在未提交工作区。不要执行破坏性 Git 操作。
+当前 1.2.1 代码、文档、测试和发布包已保存到 Git 基线提交 `bbfede8`；后续开发仍不得使用会覆盖未提交工作的破坏性 Git 操作。
+
+### 2026-08-20 Chrome 扩展智能体化更新
+
+当前开发目录已迁移到：
+
+```text
+/Users/cvsc/Documents/项目开发文件夹/agentictools
+```
+
+Chrome 扩展 1.5.0 已改名为 `AI Visit website`，界面和权限已收敛为智能体 Browser Bridge：
+
+- 删除人工保存网页、snippets、标签/文件夹、导入导出、快捷键和右键菜单；
+- 删除 `reuters-validation.*` 验证页面与消息入口；
+- 保留 `reuters-article-extractor.js`，因为它是智能体读取 Reuters 正文的生产提取器；
+- 点击扩展图标只打开 Bridge 设置页；
+- 不自动删除浏览器中遗留的 snippets/tags 数据，避免升级造成不可逆数据损失；
+- 当前可安装包为 `release/ai-visit-website-chrome-extension-1.5.0.zip`。
+
+修改前 Git 回退标签：
+
+```text
+baseline-ai-visit-website-1.2.1-extension-1.5.0
+```
 
 ## 1. 下次任务可直接复制的启动提示
 
@@ -26,10 +49,10 @@
 请继续开发 AI Visit website 1.2.1。
 
 先完整阅读：
-/Users/cvsc/Documents/snippet extension v1.4.3/agentictools/NEXT_SESSION_HANDOFF_CN.md
+/Users/cvsc/Documents/项目开发文件夹/agentictools/NEXT_SESSION_HANDOFF_CN.md
 
 工作目录：
-/Users/cvsc/Documents/snippet extension v1.4.3/agentictools
+/Users/cvsc/Documents/项目开发文件夹/agentictools
 
 开始后先执行只读检查：
 - git status --short --branch
@@ -40,14 +63,14 @@
 - lsof -nP -iTCP:32145 -sTCP:LISTEN
 
 约束：
-1. 当前 1.2.1 全部成果未提交，不得 reset、clean、checkout 覆盖或未经确认 stash。
-2. 父扩展仓库和 agentictools 是两个独立 Git 仓库，都有用户改动。
+1. 先检查工作区，不得 reset、clean、checkout 覆盖或未经确认 stash。
+2. 当前仓库同时保存插件、Chrome 扩展源码和发布包；不要从历史父仓库覆盖当前扩展。
 3. canonical Python 源码与插件内置副本必须保持一致。
 4. 不绕过 robots、CAPTCHA、登录、付费墙或网站访问控制。
 5. sitemap 标题、URL、时间只是发现证据；正文结论必须来自成功读取的 Markdown。
 6. page_save 只能保存已经审阅且任务明确要求保留的正文。
 7. 不得打印或复制 browser-bridge-token 到聊天、日志或报告。
-8. 未经用户确认，不要 commit、tag、push、发布或删除现有 release 包。
+8. 不得修改或删除现有回退标签；未经用户确认不要 push、发布或删除现有 release 包。
 
 首要任务：
 为 plugins/ai-visit-website/bin/ai-visit-website-mcp 增加 --bridge-only，
@@ -60,7 +83,7 @@
 
 ## 2. 仓库与回退边界
 
-### 父扩展仓库
+### 历史父扩展仓库（仅供来源追溯）
 
 | 项目 | 当前值 |
 | --- | --- |
@@ -70,22 +93,23 @@
 | tag / remote | 均无 |
 | 状态 | dirty，包含已修改和大量未跟踪文件 |
 
-Chrome 扩展、Bridge 轮询端和 Reuters 正文提取器位于父仓库。`agentictools/` 在父仓库中是未跟踪目录，但它内部有独立 `.git`。
+不要再把该父仓库作为当前 Chrome 扩展的 canonical 开发目录，也不要用它覆盖当前仓库中的扩展副本。
 
-### agentictools 独立仓库
+### 当前 agentictools 仓库
 
 | 项目 | 当前值 |
 | --- | --- |
-| 路径 | `/Users/cvsc/Documents/snippet extension v1.4.3/agentictools` |
-| 分支 | `main` |
-| HEAD | `23b22f1 Package AI Visit website for Codex OpenClaw and Hermes` |
-| tag / remote | 均无 |
-| 状态 | dirty，当前 1.2.1 尚未提交 |
+| 路径 | `/Users/cvsc/Documents/项目开发文件夹/agentictools` |
+| 分支 | `codex/chrome-extension-development` |
+| 修改前基线 | `bbfede8 Checkpoint AI Visit website 1.2.1 and Chrome extension 1.5.0` |
+| 回退标签 | `baseline-ai-visit-website-1.2.1-extension-1.5.0`、`chrome-extension-1.5.0-agent-ui` |
+| remote | 无 |
+| 状态 | Chrome 扩展已收敛为智能体 Bridge；以 `git status` 和 `git log` 为准 |
 
-`23b22f1` 中的插件仍是早期 `0.2.0`。当前版本字符串虽然是 `1.2.1`，但没有 `1.2.0` 或 `1.2.1` commit/tag 可供安全回退。版本字符串不是回退锚点。
+`baseline-ai-visit-website-1.2.1-extension-1.5.0` 保存修改前的完整 1.2.1/1.5.0 状态；`chrome-extension-1.5.0-agent-ui` 保存本轮智能体化界面。版本字符串本身不是回退锚点，应使用这些 Git 标签。
 
 ```bash
-cd '/Users/cvsc/Documents/snippet extension v1.4.3/agentictools'
+cd '/Users/cvsc/Documents/项目开发文件夹/agentictools'
 git status --short --branch
 git diff --stat
 git diff --check
@@ -106,8 +130,8 @@ git remote -v
 | Python runtime | `1.2.1` |
 | Codex 插件 | `ai-visit-website@personal` |
 | Codex 状态 | `installed=true, enabled=true` |
-| Codex source | `/Users/cvsc/Documents/snippet extension v1.4.3/agentictools/plugins/ai-visit-website` |
-| Marketplace | `/Users/cvsc/Documents/snippet extension v1.4.3/agentictools/.agents/plugins/marketplace.json` |
+| Codex source | `/Users/cvsc/Documents/项目开发文件夹/agentictools/plugins/ai-visit-website` |
+| Marketplace | `/Users/cvsc/Documents/项目开发文件夹/agentictools/.agents/plugins/marketplace.json` |
 | Bridge | `http://127.0.0.1:32145` |
 
 ```text
@@ -118,6 +142,10 @@ SHA-256：4000653b53277d7e1b1b5efe0642ada3dfadc2fabfdbe8de556645022277a083
 release/ai-visit-website-1.2.1.zip
 大小：82749 bytes
 SHA-256：2516a00c8e599b00f97e3c42a90a424f697f0f02531c468d504cbd62e8e963b8
+
+release/ai-visit-website-chrome-extension-1.5.0.zip
+大小：533949 bytes
+SHA-256：682f5e960dbdba6da562892b21f52f7edf90bb7c63d4598acfc16ea1ad5c747f
 ```
 
 发布包已生成并安装到 Codex，但没有上传到 npm、GitHub 或其他远端。
@@ -163,14 +191,15 @@ plugins/ai-visit-website/mcp.json
 plugins/ai-visit-website/bin/ai-visit-website-mcp
 ```
 
-父仓库 Chrome 端关键文件：
+当前仓库 Chrome 扩展关键文件：
 
 ```text
-agent-browser-bridge.js
-background.js
-settings.js
-settings.html
-reuters-article-extractor.js
+ai-visit-website-chrome-extension-1.5.0/agent-browser-bridge.js
+ai-visit-website-chrome-extension-1.5.0/background.js
+ai-visit-website-chrome-extension-1.5.0/settings.js
+ai-visit-website-chrome-extension-1.5.0/settings.html
+ai-visit-website-chrome-extension-1.5.0/settings.css
+ai-visit-website-chrome-extension-1.5.0/reuters-article-extractor.js
 ```
 
 ## 5. MCP 工具合同
@@ -225,7 +254,7 @@ AI_VISIT_WEBSITE_BRIDGE_PORT=32145 \
 一次性配对值可在本机终端打印：
 
 ```bash
-cd '/Users/cvsc/Documents/snippet extension v1.4.3/agentictools/plugins/ai-visit-website'
+cd '/Users/cvsc/Documents/项目开发文件夹/agentictools/plugins/ai-visit-website'
 ./bin/ai-visit-website-mcp --print-bridge-token
 ```
 
@@ -329,7 +358,7 @@ plugins/ai-visit-website/README.md
 ### Python、插件和 Skill
 
 ```bash
-cd '/Users/cvsc/Documents/snippet extension v1.4.3/agentictools'
+cd '/Users/cvsc/Documents/项目开发文件夹/agentictools'
 
 .venv/bin/python -m pytest -q
 .venv/bin/python -m compileall -q src plugins/ai-visit-website/server/src
@@ -348,16 +377,13 @@ git diff --check
 ### Chrome 扩展
 
 ```bash
-cd '/Users/cvsc/Documents/snippet extension v1.4.3'
+cd '/Users/cvsc/Documents/项目开发文件夹/agentictools'
 
-node tests/agent-browser-bridge.test.js
-node tests/background-validation-bridge.test.js
-node tests/reuters-article-extractor.test.js
-node tests/reuters-validation.test.js
-node tests/markdown-extractor.test.js
-node --check agent-browser-bridge.js
-node --check background.js
-node --check settings.js
+node tests/test_chrome_extension_contract.js
+node --check ai-visit-website-chrome-extension-1.5.0/agent-browser-bridge.js
+node --check ai-visit-website-chrome-extension-1.5.0/background.js
+node --check ai-visit-website-chrome-extension-1.5.0/settings.js
+node --check ai-visit-website-chrome-extension-1.5.0/reuters-article-extractor.js
 git diff --check
 ```
 
@@ -375,10 +401,10 @@ git diff --check
 ## 11. 打包、安装和完成定义
 
 ```bash
-cd '/Users/cvsc/Documents/snippet extension v1.4.3/agentictools/plugins/ai-visit-website'
+cd '/Users/cvsc/Documents/项目开发文件夹/agentictools/plugins/ai-visit-website'
 npm pack
 
-cd '/Users/cvsc/Documents/snippet extension v1.4.3/agentictools'
+cd '/Users/cvsc/Documents/项目开发文件夹/agentictools'
 codex plugin add ai-visit-website@personal -c enable.plugins=disabled
 ```
 
@@ -393,6 +419,6 @@ codex plugin add ai-visit-website@personal -c enable.plugins=disabled
 - 独立 Bridge 与另一个 MCP 进程完成真实调用；
 - Reuters 或另一个授权站点至少一篇正文读取成功；
 - 无凭据泄漏、访问控制绕过或自动全量归档；
-- 用户决定是否创建 Git commit/tag 和新发布包。
+- 新功能完成后创建新的 Git 回退点和发布包，不覆盖现有标签。
 
-当前没有可靠的 1.2.0/1.2.1 Git 回退点。若用户决定保存成果，应先审阅 dirty 工作区、排除敏感文件和运行时数据、跑完验证，再由用户明确授权 commit/tag。不要自行创建提交或标签。
+当前已有修改前基线和 Chrome 扩展智能体化两个可靠标签。恢复时优先从标签新建恢复分支，不要用破坏性命令覆盖未提交工作。

@@ -2,10 +2,6 @@ if (typeof importScripts === "function") {
   importScripts("reuters-article-extractor.js", "agent-browser-bridge.js");
 }
 
-const OPEN_MANAGER_MENU_ID = "openSnippetManager";
-const OPEN_REUTERS_VALIDATION_MENU_ID = "openReutersValidation";
-const SUCCESS_BADGE = "✓";
-const FAILURE_BADGE = "!";
 const AGENT_BRIDGE_WAKE_ALARM = "agentBrowserBridgeWake";
 let agentBrowserWorkerTabId = null;
 
@@ -27,224 +23,31 @@ if (chrome.alarms?.onAlarm?.addListener) {
   });
 }
 
-// ------------------------------
-// Folder Helpers
-// ------------------------------
-function ensureFoldersStructure(store) {
-  if (!store.folders || typeof store.folders !== "object") {
-    store.folders = {};
-  }
-  return store.folders;
-}
-
-// ------------------------------
-// Storage / Menu Initialization
-// ------------------------------
 chrome.runtime.onInstalled.addListener(() => {
   chrome.alarms?.create(AGENT_BRIDGE_WAKE_ALARM, { periodInMinutes: 0.5 });
-  chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({
-      id: OPEN_MANAGER_MENU_ID,
-      title: "Open Snippet Manager",
-      contexts: ["action"]
-    });
-    chrome.contextMenus.create({
-      id: OPEN_REUTERS_VALIDATION_MENU_ID,
-      title: "Open Reuters Browser Validation",
-      contexts: ["action"]
-    });
-  });
-
-  chrome.storage.local.get({ tags: [], folders: {}, snippets: [] }, (data) => {
-    if (!Array.isArray(data.tags)) data.tags = [];
-    if (!data.folders || typeof data.folders !== "object") data.folders = {};
-    if (!Array.isArray(data.snippets)) data.snippets = [];
-    chrome.storage.local.set(data);
-  });
+  globalThis.AgentBrowserBridge?.start();
 });
 
-// ------------------------------
-// Read-only Browser Validation Bridge
-// ------------------------------
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type === "agent-browser-bridge-config-changed") {
-    if (message.enabled === false) {
-      globalThis.AgentBrowserBridge?.stop();
-    } else {
-      globalThis.AgentBrowserBridge?.restart();
+  if (message?.type !== "agent-browser-bridge-config-changed") {
+    return false;
+  }
+  if (message.enabled === false) {
+    globalThis.AgentBrowserBridge?.stop();
+  } else {
+    globalThis.AgentBrowserBridge?.restart();
+  }
+  sendResponse({ success: true });
+  return false;
+});
+
+chrome.action.onClicked.addListener(() => {
+  chrome.runtime.openOptionsPage(() => {
+    if (chrome.runtime.lastError) {
+      console.warn("Could not open AI Visit website settings.");
     }
-    sendResponse({ success: true });
-    return false;
-  }
-  if (!["capture-page-for-validation", "extract-reuters-article"].includes(message?.type)) {
-    return false;
-  }
-
-  const tabId = Number(message.tabId);
-  if (!Number.isInteger(tabId) || tabId <= 0) {
-    sendResponse({ success: false, error: "invalid_tab_id" });
-    return false;
-  }
-
-  const captureFunction = message.type === "extract-reuters-article"
-    ? globalThis.injectedExtractReutersArticle
-    : injectedCapturePageAsMarkdown;
-  if (typeof captureFunction !== "function") {
-    sendResponse({ success: false, error: "extractor_unavailable" });
-    return false;
-  }
-
-  chrome.scripting.executeScript(
-    {
-      target: { tabId },
-      func: captureFunction
-    },
-    (results) => {
-      if (chrome.runtime.lastError) {
-        sendResponse({
-          success: false,
-          error: "capture_failed",
-          message: chrome.runtime.lastError.message || "The page could not be read."
-        });
-        return;
-      }
-
-      const capture = results?.[0]?.result;
-      if (!capture?.success && message.type === "extract-reuters-article") {
-        sendResponse({
-          success: false,
-          error: capture?.failure?.code || "empty_capture",
-          capture
-        });
-        return;
-      }
-      if (!capture?.markdown) {
-        sendResponse({ success: false, error: "empty_capture", capture });
-        return;
-      }
-
-      sendResponse({ success: true, capture });
-    }
-  );
-
-  return true;
-});
-
-// ------------------------------
-// Action / Menu / Keyboard Entry Points
-// ------------------------------
-chrome.action.onClicked.addListener((tab) => {
-  saveTabAsMarkdown(tab);
-});
-
-chrome.contextMenus.onClicked.addListener((info) => {
-  if (info.menuItemId === OPEN_MANAGER_MENU_ID) {
-    chrome.tabs.create({ url: chrome.runtime.getURL("popup.html") });
-  }
-  if (info.menuItemId === OPEN_REUTERS_VALIDATION_MENU_ID) {
-    chrome.tabs.create({ url: chrome.runtime.getURL("reuters-validation.html") });
-  }
-});
-
-chrome.commands.onCommand.addListener((command) => {
-  if (command !== "save-snippet") return;
-
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    saveTabAsMarkdown(tabs[0]);
   });
 });
-
-function saveTabAsMarkdown(tab) {
-  if (!isSaveableTab(tab)) {
-    showBadge(tab?.id, FAILURE_BADGE);
-    return;
-  }
-
-  const useReutersArticleExtractor = isReutersBusinessArticleUrl(tab.url);
-  const captureFunction = useReutersArticleExtractor
-    ? globalThis.injectedExtractReutersArticle
-    : injectedCapturePageAsMarkdown;
-  if (typeof captureFunction !== "function") {
-    showBadge(tab.id, FAILURE_BADGE);
-    return;
-  }
-
-  chrome.scripting.executeScript(
-    {
-      target: { tabId: tab.id },
-      func: captureFunction
-    },
-    (results) => {
-      const capture = results?.[0]?.result;
-      if (chrome.runtime.lastError || !capture?.markdown || capture.success === false) {
-        showBadge(tab.id, FAILURE_BADGE);
-        return;
-      }
-
-      const title = capture.title || tab.title || "Untitled page";
-      const markdown = capture.markdown.replace(
-        /^Source: .*$/m,
-        () => `Source: ${tab.url}`
-      );
-
-      const snippet = {
-        text: markdown,
-        url: tab.url,
-        date: new Date().toLocaleString(),
-        note: title,
-        folder: "Root",
-        tags: [],
-        contentFormat: "markdown",
-        captureMode: useReutersArticleExtractor ? "article" : "page",
-        captureAdapter: capture.adapter || "generic-page-dom",
-        contentHash: capture.contentHash || null,
-        publishedAt: capture.publishedAt || null,
-        author: capture.author || null,
-        selectorStrategy: capture.selectorStrategy || null,
-        title,
-        excerpt: capture.excerpt || ""
-      };
-
-      chrome.storage.local.get(
-        { snippets: [], tags: [], folders: {} },
-        (store) => {
-          const foldersTree = ensureFoldersStructure(store);
-          const snippets = Array.isArray(store.snippets) ? store.snippets : [];
-          snippets.push(snippet);
-
-          chrome.storage.local.set(
-            {
-              snippets,
-              tags: Array.isArray(store.tags) ? store.tags : [],
-              folders: foldersTree
-            },
-            () => showBadge(tab.id, SUCCESS_BADGE)
-          );
-        }
-      );
-    }
-  );
-}
-
-function isSaveableTab(tab) {
-  if (!tab?.id || !tab.url) return false;
-
-  let url;
-  try {
-    url = new URL(tab.url);
-  } catch (_error) {
-    return false;
-  }
-
-  if (!["http:", "https:", "file:"].includes(url.protocol)) return false;
-
-  const restrictedHosts = new Set([
-    "chrome.google.com",
-    "chromewebstore.google.com"
-  ]);
-
-  return !restrictedHosts.has(url.hostname);
-}
 
 function isReutersBusinessArticleUrl(value) {
   try {
@@ -564,18 +367,6 @@ async function sha256Markdown(markdown) {
 
 function bridgeDelay(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
-function showBadge(tabId, text) {
-  const details = typeof tabId === "number" ? { tabId } : {};
-  const color = text === SUCCESS_BADGE ? "#188038" : "#b00020";
-
-  chrome.action.setBadgeBackgroundColor({ ...details, color });
-  chrome.action.setBadgeText({ ...details, text });
-
-  setTimeout(() => {
-    chrome.action.setBadgeText({ ...details, text: "" });
-  }, 1600);
 }
 
 // ------------------------------
