@@ -25,7 +25,7 @@ The MCP process owns an authenticated HTTP task queue bound only to `127.0.0.1:3
 From this repository root, print the local pairing values with:
 
 ```bash
-cd '/Users/cvsc/Documents/项目开发文件夹/agentictools'
+cd '/Users/Documents/agentictools'
 ./plugins/ai-visit-website/bin/ai-visit-website-mcp --print-bridge-token
 ```
 
