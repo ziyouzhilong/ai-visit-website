@@ -20,13 +20,31 @@ The calling agent decides what is relevant, which candidates enter a batch, what
 
 The MCP process owns an authenticated HTTP task queue bound only to `127.0.0.1:32145`. The extension polls that queue with a one-time pairing token and accepts only website origins the user listed in extension Settings. The token is stored in one user-level bridge data directory shared by Codex, OpenClaw, Hermes, and manual setup, while each host keeps its runtime and archive isolated. It opens one visible tab at a time, returns Markdown and a full-content SHA-256, and stops on login, CAPTCHA, access-denied, paywall, or unauthorized redirects. A batch contains at most 20 explicit URLs and its status lives only for the current MCP process. Cookies, passwords, authorization headers, and browser storage are never returned.
 
-For the packaged plugin, print the one-time pairing values with:
+From this repository root, print the local pairing values with:
 
 ```bash
+cd '/Users/cvsc/Documents/项目开发文件夹/agentictools'
+./plugins/ai-visit-website/bin/ai-visit-website-mcp --print-bridge-token
+```
+
+For a copy installed or unpacked elsewhere, first change into the plugin directory—the directory that contains `bin/`—and run:
+
+```bash
+cd '/absolute/path/to/ai-visit-website'
 ./bin/ai-visit-website-mcp --print-bridge-token
 ```
 
-Open the **AI Visit website** extension to reach its agent-first Browser Bridge settings. Enter the port and token, add authorized origins such as `https://www.reuters.com`, enable the bridge, and check the connection. The extension has no manual snippet capture, tag manager, import/export, or Reuters validation UI. Call `browser_status` before the first browser read.
+The command does not start the MCP server. It prints three local setup values:
+
+```text
+bridge_port=32145
+bridge_token_file=/local/user/data/path/browser-bridge-token
+bridge_token=<secret pairing value>
+```
+
+If the token file does not exist, the launcher creates it with user-only file permissions; otherwise it reuses the existing stable token. Copy only the value after `bridge_token=` into the extension's **Pairing token** field and enter `bridge_port` in **Local port**. Do not paste the token into chat, logs, screenshots, reports, or source control.
+
+Open the **AI Visit website** extension to reach its agent-first Browser Bridge settings. Add authorized origins such as `https://www.reuters.com`, enable the bridge, save the settings, and click **Check connection**. The extension has no manual snippet capture, tag manager, import/export, or Reuters validation UI. Call `browser_status` before the first browser read.
 
 ## Local setup
 

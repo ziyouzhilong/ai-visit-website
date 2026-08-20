@@ -27,13 +27,31 @@ The MCP launcher performs setup automatically on first start and upgrades an exi
 
 ## Pair the Chrome extension
 
-Start the MCP server once or call `browser_status`, then print the one-time local pairing values:
+The pairing command must be run from this packaged plugin directory—the directory that contains `bin/`. It creates the local token if one does not exist and reuses the same token on later runs; it does not need to start the MCP server.
 
 ```bash
+cd '/absolute/path/to/ai-visit-website'
 ./bin/ai-visit-website-mcp --print-bridge-token
 ```
 
-Open the **AI Visit website** Chrome extension, enter the Browser Bridge port and token, add each authorized website origin (for example `https://www.reuters.com`), enable the bridge, and click **Check connection**. The extension is agent-first and contains no manual snippet manager or Reuters validation page. The bridge listens only on `127.0.0.1`, opens one visible tab, never exports cookies or browser credentials, and stops on login, CAPTCHA, access-denied, paywall, or a redirect outside the allowlist.
+When working directly from this repository, the equivalent complete command is:
+
+```bash
+cd '/Users/cvsc/Documents/项目开发文件夹/agentictools'
+./plugins/ai-visit-website/bin/ai-visit-website-mcp --print-bridge-token
+```
+
+Expected output has this shape:
+
+```text
+bridge_port=32145
+bridge_token_file=/local/user/data/path/browser-bridge-token
+bridge_token=<secret pairing value>
+```
+
+Open the **AI Visit website** Chrome extension. Enter `bridge_port` under **Local port**, copy only the value after `bridge_token=` into **Pairing token**, and add each authorized website origin (for example `https://www.reuters.com`). Enable the bridge, save the settings, and click **Check connection**. Never paste the token into chat, logs, screenshots, reports, or source control.
+
+The extension is agent-first and contains no manual snippet manager or Reuters validation page. The bridge listens only on `127.0.0.1`, opens one visible tab, never exports cookies or browser credentials, and stops on login, CAPTCHA, access-denied, paywall, or a redirect outside the allowlist.
 
 ## Codex
 
