@@ -97,7 +97,7 @@ ai-visit-website-chrome-extension-1.5.0/
 4. 选择解压后的扩展目录；
 5. 点击扩展图标进入 Browser Bridge 设置。
 
-扩展界面只负责智能体 Bridge 配置，不包含人工保存网页、标签/文件夹、导入导出或 Reuters 验证页面。
+扩展界面只负责智能体 Bridge 配置，不包含人工保存网页、标签/文件夹、导入导出。
 
 ## 获取 Pairing token
 
